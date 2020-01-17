@@ -10,5 +10,4 @@ if [ -z $PLAY_RUNNING ]; then
    rm /srv/gca/target/universal/stage/RUNNING_PID
 fi
 
-activator start
-
+sbt start

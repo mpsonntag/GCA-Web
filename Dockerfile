@@ -1,8 +1,7 @@
 # Dockerfile for GCA-Web
-FROM java:8
+ARG OPENJDK_TAG=8u232
+FROM openjdk:${OPENJDK_TAG}
 
-# same as travis
-ENV  ACTIVATOR_VERSION 1.3.7
 ENV  DEBIAN_FRONTEND noninteractive
 
 # Use existing sbt cache from existing container to avoid downloads
@@ -10,14 +9,15 @@ ENV  DEBIAN_FRONTEND noninteractive
 # sbt and play version.
 FROM gnode/gca:dependencies
 
-RUN rm /tmp/typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip
-RUN rm -r /usr/local/activator-${ACTIVATOR_VERSION}-minimal
+ARG SBT_VERSION=1.3.7
 
-WORKDIR /tmp
-RUN wget https://downloads.typesafe.com/typesafe-activator/${ACTIVATOR_VERSION}/typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip
-RUN unzip -q typesafe-activator-${ACTIVATOR_VERSION}-minimal.zip -d /usr/local
-
-ENV PATH /usr/local/activator-${ACTIVATOR_VERSION}-minimal:$PATH
+# Install sbt
+RUN \
+  curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
+  dpkg -i sbt-$SBT_VERSION.deb && \
+  rm sbt-$SBT_VERSION.deb
+RUN apt-get update
+RUN apt-get install sbt
 
 # install to srv gca
 RUN mkdir -p /srv/gca
@@ -41,7 +41,8 @@ RUN echo "db.default.url=\"jdbc:h2:/srv/gca/db/gca-web\"" >> /srv/gca/conf/appli
 # test and stage
 WORKDIR /srv/gca
 # Required to get dependencies before running the startup script.
-RUN activator test stage
+RUN sbt stage
+RUN sbt test
 
 VOLUME ["/srv/gca/db"]
 VOLUME ["/srv/gca/figures"]
