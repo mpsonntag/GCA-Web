@@ -5,11 +5,16 @@
 @template(account, None, "") {
 
     <!-- if required redirect after login -->
+    <!-- document.referrer works on Chrome but fails on Mozilla -->
     <script>
         var ref = window.sessionStorage.getItem("gca_ref")
+        var patch_ref = window.sessionStorage.getItem("gca_login_ref")
         if (ref !== undefined && ref !== null) {
             window.sessionStorage.removeItem("gca_ref");
             window.location.replace(ref);
+        } else if (patch_ref !== null && patch_ref !== undefined && patch_ref.includes(window.location.hostname) && !patch_ref.includes("/login")) {
+            window.sessionStorage.removeItem("gca_login_ref");
+            window.location.replace(patch_ref);
         }
     </script>
 

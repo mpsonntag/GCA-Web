@@ -79,6 +79,16 @@
     }
 </head>
 <body>
+    <!-- Prepare for redirection after login - Monkeypatch to accommodate failing Mozilla document.referrer -->
+    @if(account.isEmpty && !("login" :: "register" :: Nil).contains(active.toLowerCase)) {
+        <!-- Provide URL for redirection after login -->
+        <script>
+            if (window.location.href !== null && window.location.href !== undefined && !window.location.href.includes("/login")) {
+                window.sessionStorage.setItem("gca_login_ref", window.location.href);
+            }
+        </script>
+    }
+
     <div class="container">
     <!-- navigation -->
 
